@@ -13,8 +13,7 @@ def current_milli_time():
 
 
 class MotorControl(Thread):
-    default = Command()
-    default.set_command({"linvel": 0.0, "angvel": 0.0, "duration": 1000})
+    default = {"linvel": 0.00, "angvel": 0.00, "duration": 1000}
 
     def __init__(self, shared):
         Thread.__init__(self)
@@ -55,18 +54,18 @@ class MotorControl(Thread):
     def run(self):
         self.rc.start()
         self.light.start()
- 
+
         while self.data.running.get_value():
 
             command = {}
             duration = MILLISECOND
             if self.autonomous.get_value():
                 command = self.data.commands.pop()
+                if len(command.keys()) == 0:
+                    command = MotorControl.default
+                self.data.new_command.set_value(False)
             else:
                 command = self.rccommand.get_value()
-
-            if len(command.keys()) == 0:
-                command = MotorControl.default
 
             print 'Command being executed: %s' % command
             duration = command["duration"]
@@ -81,8 +80,10 @@ class MotorControl(Thread):
             while not self.data.new_command.get_value():
                 currenttime = current_milli_time()
                 if currenttime - starttime > duration:
+                    print "breaking"
                     break
-                sleep(MILLISECOND)
+                sleep(2 * MILLISECOND)
+            print "Getting next command"
 
         self.light.stop()
         self.rc.stop()

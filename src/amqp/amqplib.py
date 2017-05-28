@@ -6,7 +6,7 @@ class Protected(object):
     # Class with simple protected value
     def __init__(self):
         self.lock = threading.Lock()
-        self.value = {}
+        self.value = []
 
     def set_value(self, val):
         self.acquire_lock()
@@ -24,7 +24,7 @@ class Protected(object):
         ret = {}
         self.acquire_lock()
         if len(self.value) > 0:
-            ret = self.value.pop
+            ret = self.value.pop()
         self.release_lock()
         return ret
 
