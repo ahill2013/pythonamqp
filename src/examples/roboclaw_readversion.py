@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 import time
-from roboclaw import Roboclaw
+
+from examples.roboclaw import Roboclaw
 
 # Windows comport name
 #rc = Roboclaw("COM9",115200)
