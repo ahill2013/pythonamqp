@@ -55,7 +55,7 @@ class MotorControl(Thread):
     def run(self):
         self.rc.start()
         self.light.start()
-
+ 
         while self.data.running.get_value():
 
             command = {}
