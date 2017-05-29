@@ -1,4 +1,8 @@
-import RPi.GPIO as GPIO
+try:
+	import RPi.GPIO as GPIO
+except RuntimeError:
+	print("Error importing RPi.GPIO! Are you superuser (root)?")
+
 import time
 
 
