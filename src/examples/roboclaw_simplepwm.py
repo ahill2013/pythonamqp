@@ -41,16 +41,25 @@ rc.Open()
 address = 0x80
 
 while 1:
-    rc.ForwardM1(address, 32)  # 1/4 power forward
+    rc.ForwardM1(address, 127)  # 1/4 power forward
     # rc.BackwardM2(address, 32)  # 1/4 power backward
     # time.sleep(2)
 
     # rc.BackwardM1(address, 32)  # 1/4 power backward
-    rc.ForwardM2(address, 32)  # 1/4 power forward
-    time.sleep(8)
+    rc.ForwardM2(address, 127)  # 1/4 power forward
+
+    for i in range(0, 80):
+        displayspeed()
+        time.sleep(0.1)
+
+    time.sleep(2)
 
     rc.BackwardM1(address, 0)  # Stopped
     rc.ForwardM2(address, 0)  # Stopped
+    for i in range(0, 80):
+        displayspeed()
+        time.sleep(0.1
+)
     time.sleep(5)
 
     # m1duty = 16
