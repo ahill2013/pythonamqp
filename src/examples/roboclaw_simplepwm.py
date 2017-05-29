@@ -5,7 +5,7 @@ from roboclaw import Roboclaw
 # Windows comport name
 #rc = Roboclaw("COM9", 115200)
 # Linux comport name
-rc = Roboclaw("/dev/roboclaw",115200)
+rc = Roboclaw("/dev/roboclaw", 115200)
 
 rc.Open()
 address = 0x80
