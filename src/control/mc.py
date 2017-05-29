@@ -7,6 +7,9 @@ from rc import RemoteControl
 
 MILLISECOND = 0.001
 
+DIFFERENTIAL_MDOEL_L = 0.7747   # distance between wheels (axle length)
+DIFFERENTIAL_MDOEL_R = 0.166    # radius of the wheels
+
 
 def current_milli_time():
     return int(round(time() * 1000))
@@ -47,6 +50,16 @@ class MotorControl(Thread):
     # Set light values here
     def change_to_autonomous(self):
         pass
+
+    @staticmethod
+    # Given linear and angular velocities return the desired speed of the left wheel
+    def get_left_speed(lin, ang):
+        return ((lin / DIFFERENTIAL_MDOEL_R) - DIFFERENTIAL_MDOEL_L * ang) / (2 * DIFFERENTIAL_MDOEL_R)
+
+    @staticmethod
+    # Given linear and angular velocities return the desired speed of the right wheel
+    def get_right_speed(lin, ang):
+        return ((lin / DIFFERENTIAL_MDOEL_R) + DIFFERENTIAL_MDOEL_L * ang) / (2 * DIFFERENTIAL_MDOEL_R)
 
     def send_motor_command(self, linear, angular):
         pass
