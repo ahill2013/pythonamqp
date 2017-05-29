@@ -24,7 +24,6 @@ class Light(Thread):
         """
         Thread.__init__(self)
         self.mode = mode
-        # self.toggle = True
         self.running = Protected()
         self.running.set_value(True)
 

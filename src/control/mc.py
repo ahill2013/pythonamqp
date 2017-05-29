@@ -17,18 +17,18 @@ class MotorControl(Thread):
 
     def __init__(self, shared):
         Thread.__init__(self)
-        self.autonomous = Protected()
-        self.autonomous.set_value(True)
+        self.mode = Protected()
+        self.mode.set_value(True)
 
-        self.rccommand = Protected()
+        self.rccommand = Protected() # most recently set rc command
         self.rccommand.set_value(MotorControl.default)
 
-        self.data = shared
+        self.shared = shared
 
-        self.rc = RemoteControl(self.autonomous, self.rccommand)
-        self.light = Light(self.autonomous)
+        self.rc = RemoteControl(self.mode, self.rccommand)
+        self.light = Light(self.mode)
 
-    def set_autonomous(self, auto):
+    def set_mode(self, auto):
         """
         :param Boolean auto:
         :return:
@@ -38,7 +38,7 @@ class MotorControl(Thread):
         else:
             self.change_to_rc()
 
-        self.autonomous.set_value(auto)
+        self.mode.set_value(auto)
 
     # Set light values here
     def change_to_rc(self):
@@ -55,15 +55,15 @@ class MotorControl(Thread):
         self.rc.start()
         self.light.start()
 
-        while self.data.running.get_value():
+        while self.shared.running.get_value():
 
             command = {}
             duration = MILLISECOND
-            if self.autonomous.get_value():
-                command = self.data.commands.pop()
-                if len(command.keys()) == 0:
-                    command = MotorControl.default
-                self.data.new_command.set_value(False)
+            if self.mode.get_value():                     # If in auto
+                self.shared.new_command.set_value(False)  # set new commands to false
+                command = self.shared.commands.pop()      # get a command from amqp queue
+                if len(command.keys()) == 0:              # If there are no commands in amqp queue -
+                    command = MotorControl.default        # - use the default command (stop)
             else:
                 command = self.rccommand.get_value()
 
@@ -74,19 +74,23 @@ class MotorControl(Thread):
 
             # Send command here
             self.send_motor_command(linear, angular)
-            starttime = current_milli_time()
+            starttime = current_milli_time() # time at start of loop, measure duration of command by comparing current
+                                             # time to this time
 
             # Until command has been executed long enough or new command arrives do command
-            while not self.data.new_command.get_value():
+            while not self.shared.running.get_value() and self.shared.new_command.get_value():
                 currenttime = current_milli_time()
+
+                # if command has been executed for the duration specified exit and get new command
                 if currenttime - starttime > duration:
                     print "breaking"
                     break
-                sleep(2 * MILLISECOND)
+                sleep(2 * MILLISECOND)  # sleep two milliseconds and check again
             print "Getting next command"
 
         self.light.stop()
         self.rc.stop()
 
+    # kill thread
     def stop(self):
-        self.data.running.set_value(False)
+        self.shared.running.set_value(False)

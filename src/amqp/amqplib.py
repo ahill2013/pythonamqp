@@ -19,7 +19,6 @@ class Protected(object):
         self.release_lock()
         return value
 
-    # use wisely
     def pop(self):
         ret = {}
         self.acquire_lock()
@@ -48,13 +47,18 @@ class Command:
 
 
 class Commands(object):
+    """
+    List of commands received by the consumer and to be executed if in autonomous mode
+    """
     def __init__(self):
         self.protected = Protected()
         self.protected.set_value([])
 
+    # Set the list of commands
     def set_commands(self, commands):
         self.protected.set_value(commands)
 
+    # Pop a command, if none is present pop an empty dictionary
     def pop(self):
         return self.protected.pop()
 
@@ -65,8 +69,8 @@ class Data(object):
     """
 
     def __init__(self):
-        self.commands = Commands()
-        self.new_command = Protected()
+        self.commands = Commands()      # list of commands to be executed
+        self.new_command = Protected()  # is there a new list of commands to be executed (true -- yes, false -- no)
         self.new_command.set_value(True)
-        self.running = Protected()
+        self.running = Protected()      # should this thread continue to run
         self.running.set_value(True)

@@ -9,7 +9,7 @@ from roboclaw import Roboclaw
 # rc = Roboclaw("COM3", 115200)
 
 # Linux comport name
-rc = Roboclaw("/dev/ttyACM0", 115200)
+rc = Roboclaw("/dev/roboclaw", 115200)
 
 
 def displayspeed():
@@ -47,7 +47,7 @@ address = 0x80
 
 while 1:
     print "Pos 50000"
-    rc.SpeedAccelDeccelPositionM1(address, 32000, 12000, 32000, 50000, 0)
+    rc.SpeedAccelDeccelPositionM1(address, 800, 1000, 800, 50000, 0)
     for i in range(0, 80):
         displayspeed()
         time.sleep(0.1)
