@@ -38,7 +38,7 @@ class MotorControl(Thread):
     def __init__(self, shared):
         Thread.__init__(self)
         self.mode = Protected()
-        self.mode.set_value(RemoteControl.get_mode())
+        self.mode.set_value(AUTONOMOUS)
 
         self.rccommand = Protected()  # most recently set rc command
         self.rccommand.set_value(MotorControl.default)
@@ -78,8 +78,8 @@ class MotorControl(Thread):
         return ((lin / DIFFERENTIAL_MODEL_R) + DIFFERENTIAL_MODEL_L * ang) / (2 * DIFFERENTIAL_MODEL_R)
 
     def send_motor_command(self, linear, angular):
-        left_vel = MotorControl.get_left_speed(linear, angular)*TICKS_PER_REV/(2*math.pi)
-        right_vel = MotorControl.get_right_speed(linear, angular)*TICKS_PER_REV/(2*math.pi)
+        left_vel = int(round(MotorControl.get_left_speed(linear, angular)*TICKS_PER_REV/(2*math.pi)))
+        right_vel = int(round(MotorControl.get_right_speed(linear, angular)*TICKS_PER_REV/(2*math.pi)))
         MotorControl.claw.SpeedAccelM1M2(MotorControl.ADDRESS, ACCEL, left_vel, right_vel)
 
     def run(self):

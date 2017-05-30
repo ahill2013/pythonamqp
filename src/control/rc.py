@@ -21,7 +21,7 @@ class RemoteControl(Thread):
     PIN_SWITCH = 8
     # PIN_ESTOP = 10
     PIN_LIN = 12
-    PIN_ANG = 14
+    PIN_ANG = 16
     DEADZONE = .05
     RCRANGE = 400
     switch_threshold = 1700
@@ -49,6 +49,7 @@ class RemoteControl(Thread):
         return self.mode.get_value()
 
     def run(self):
+        print "Entered run in rc"
         for x in range(0, 10):
             self.get_pwm(RemoteControl.PIN_LIN)
             self.get_pwm(RemoteControl.PIN_ANG)
@@ -60,8 +61,11 @@ class RemoteControl(Thread):
             # set mode to False if rc
             # set value to {linvel: value, angvel: value, duration: milliseconds}
             chlin = self.get_pwm(RemoteControl.PIN_LIN)
+            print "chlin: %f" % chlin
             chang = self.get_pwm(RemoteControl.PIN_ANG)
+            print "chang: %f" % chang
             switch = self.get_pwm(RemoteControl.PIN_SWITCH)
+            print "switch: %f" % switch
             if switch > RemoteControl.switch_threshold:
                 self.mode.set_value(False)
                 linvel = 1*(chlin-cent_lin)/RemoteControl.RCRANGE
@@ -72,7 +76,7 @@ class RemoteControl(Thread):
                 if angvel < RemoteControl.DEADZONE and angvel > -RemoteControl.DEADZONE:
                     angvel = 0
 
-                self.value.set_value({"linear": linvel, "angular": angvel, "duration": 0.002})
+                self.value.set_value({"linvel": linvel, "angvel": angvel, "duration": 0.002})
             else:
                 self.value.set_value(RemoteControl.default)
                 self.mode.set_value(True)
@@ -81,6 +85,7 @@ class RemoteControl(Thread):
 
     def stop(self):
         self.running.set_value(False)
+        GPIO.cleanup()
 
     def current_nano_time(self):
         return int(round(time()*1000000))
@@ -90,6 +95,6 @@ class RemoteControl(Thread):
         start = self.current_nano_time()
         GPIO.wait_for_edge(pin, GPIO.FALLING)
         end = self.current_nano_time()
-        return start - end
+        return end - start
 
 
