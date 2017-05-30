@@ -3,15 +3,18 @@ try:
 except RuntimeError:
     print("Error importing RPi.GPIO! Are you superuser (root)?")
 
-from mc import MotorControl
 from threading import Thread
 from amqp.amqplib import Protected
 from time import sleep
+from time import time
+
 
 class RemoteControl(Thread):
     """
     Class where remote control is implemented. Update values provided to switch between modes
     """
+
+    default = {"linvel": 0.00, "angvel": 0.00, "duration": 1000}
 
     MILLISECOND = 0.001
 
@@ -71,7 +74,7 @@ class RemoteControl(Thread):
 
                 self.value.set_value({"linear": linvel, "angular": angvel, "duration": 0.002})
             else:
-                self.value.set_value(MotorControl.default)
+                self.value.set_value(RemoteControl.default)
                 self.mode.set_value(True)
 
             sleep(RemoteControl.MILLISECOND)
