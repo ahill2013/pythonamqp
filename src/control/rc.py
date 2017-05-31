@@ -73,8 +73,8 @@ class RemoteControl(Thread):
             print "switch: %f" % switch
             if switch > RemoteControl.switch_threshold:
                 self.mode.set_value(False)
-                linvel = 1*(chlin-cent_lin)/RemoteControl.RCRANGE
-                angvel = -.5*(chang-cent_ang)/RemoteControl.RCRANGE
+                linvel = -1*(chlin-cent_lin)/RemoteControl.RCRANGE
+                angvel = 1*(chang-cent_ang)/RemoteControl.RCRANGE
                 if RemoteControl.DEADZONE > linvel > -RemoteControl.DEADZONE:
                     linvel = 0
 

@@ -42,9 +42,9 @@ class Light(Thread):
     def run(self):
         while self.running.get_value():  # While thread is running
             if not self.mode.get_value():  # Get mode: RC or auto (false, true). If RC (false), then -
-                self.set_toggle()  # - Toggle the light --
+                self.set_to_high()  # - Toggle the light --
             else:  # Else if auto (true), then -
-                self.set_to_high()  # - Set the light solid high
+                self.set_toggle()  # - Set the light solid high
             sleep(500 * Light.MILLISECOND)  # -- Every 500 milliseconds
 
     def stop(self):
