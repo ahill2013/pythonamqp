@@ -26,7 +26,7 @@ class RemoteControl(Thread):
     PIN_ANG = 23  # 16
     DEADZONE = .05
     RCRANGE = 400
-    switch_threshold = 1700
+    switch_threshold = 1600
 
     # Initialize GPIO
     # GPIO.setmode(GPIO.BOARD)
@@ -66,22 +66,22 @@ class RemoteControl(Thread):
             # set mode to False if rc
             # set value to {linvel: value, angvel: value, duration: milliseconds}
             chlin = RemoteControl.lin.pulse_width()
-            print "chlin: %f" % chlin
+            # print "chlin: %f" % chlin
             chang = RemoteControl.ang.pulse_width()
-            print "chang: %f" % chang
+            # print "chang: %f" % chang
             switch = RemoteControl.sw.pulse_width()
-            print "switch: %f" % switch
+            # print "switch: %f" % switch
             if switch > RemoteControl.switch_threshold:
                 self.mode.set_value(False)
-                linvel = -1*(chlin-cent_lin)/RemoteControl.RCRANGE
-                angvel = 1*(chang-cent_ang)/RemoteControl.RCRANGE
+                linvel = 1*(chlin-cent_lin)/RemoteControl.RCRANGE
+                angvel = -2*(chang-cent_ang)/RemoteControl.RCRANGE
                 if RemoteControl.DEADZONE > linvel > -RemoteControl.DEADZONE:
                     linvel = 0
 
                 if RemoteControl.DEADZONE > angvel > -RemoteControl.DEADZONE:
                     angvel = 0
 
-                self.value.set_value({"linvel": linvel, "angvel": angvel, "duration": 0.002})
+                self.value.set_value({"linvel": linvel, "angvel": angvel, "duration": 2})
             else:
                 self.value.set_value(RemoteControl.default)
                 self.mode.set_value(True)

@@ -168,6 +168,7 @@ class MCConsumer(Thread):
         """
         LOGGER.info('Channel opened')
         self._channel = channel
+        self._channel.basic_qos(prefetch_count=5) # Limit the number of messages buffered in the queue
         self.add_on_channel_close_callback()
         self.setup_exchange(self.EXCHANGE)
 
@@ -315,6 +316,7 @@ class MCConsumer(Thread):
             self.data.commands.set_commands(commands)
             self.data.new_command.set_value(True)
 
+        print 'GOT MESSAGE: %s' % (message)
         self.acknowledge_message(basic_deliver.delivery_tag)
 
     def acknowledge_message(self, delivery_tag):

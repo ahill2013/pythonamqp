@@ -23,7 +23,7 @@ class Protected(object):
         ret = {}
         self.acquire_lock()
         if len(self.value) > 0:
-            ret = self.value.pop()
+            ret = self.value.pop(0)
         self.release_lock()
         return ret
 

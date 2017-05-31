@@ -18,9 +18,9 @@ TICKS_PER_REV = 753.2   # encoder ticks for one revolution of wheel
 QPPS = 4000 # max velocity in ticks per second
 
 # PID constants
-P = 1
+P = 10
 I = 0
-D = 0
+D = .1
 
 ACCEL = 2000 # acceleration rate in ticks/sec^2
 
@@ -81,6 +81,9 @@ class MotorControl(Thread):
         left_vel = int(round(MotorControl.get_left_speed(linear, angular)*TICKS_PER_REV/(2*math.pi)))
         right_vel = int(round(MotorControl.get_right_speed(linear, angular)*TICKS_PER_REV/(2*math.pi)))
         MotorControl.claw.SpeedAccelM1M2(MotorControl.ADDRESS, ACCEL, left_vel, right_vel)
+	sleep(.25)
+	currents = MotorControl.claw.ReadCurrents(MotorControl.ADDRESS)
+	print currents
 
     def run(self):
         self.rc.start()
@@ -96,8 +99,10 @@ class MotorControl(Thread):
                 if len(command.keys()) == 0:              # If there are no commands in amqp queue -
                     command = MotorControl.default        # - use the default command (stop)
             else:
+                self.shared.new_command.set_value(False)
                 self.shared.commands.set_commands([])
                 command = self.rccommand.get_value()
+                print 'Executing RC command'
 
             print 'Command being executed: %s' % command
             duration = command["duration"]
@@ -110,15 +115,16 @@ class MotorControl(Thread):
             # current time to this time
 
             # Until command has been executed long enough or new command arrives do command
-            while not self.shared.running.get_value() and self.shared.new_command.get_value():
+            mode = self.get_mode()
+            while self.shared.running.get_value() and not self.shared.new_command.get_value() and mode == self.get_mode():
                 currenttime = current_milli_time()
 
                 # if command has been executed for the duration specified exit and get new command
                 if currenttime - starttime > duration:
                     print "breaking"
                     break
-                sleep(2 * MILLISECOND)  # sleep two milliseconds and check again
-            print "Getting next command"
+                sleep(1 * MILLISECOND)  # sleep two milliseconds and check again
+            # print "Getting next command"
 
         self.light.stop()
         self.rc.stop()

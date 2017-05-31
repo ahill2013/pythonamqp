@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO, format=get_format())
 
 data = Data()
 control = MotorControl(data)
-consumer = MCConsumer('amqp://ubuntu:ubuntu@192.168.11.4:5672/%2F', data)
+consumer = MCConsumer('amqp://guest:guest@192.168.11.4:5672/%2F', data)
 try:
     consumer.start()
     control.start()
