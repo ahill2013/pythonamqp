@@ -74,14 +74,14 @@ class RemoteControl(Thread):
             if switch > RemoteControl.switch_threshold:
                 self.mode.set_value(False)
                 linvel = 1*(chlin-cent_lin)/RemoteControl.RCRANGE
-                angvel = -2*(chang-cent_ang)/RemoteControl.RCRANGE
+                angvel = -1*(chang-cent_ang)/RemoteControl.RCRANGE
                 if RemoteControl.DEADZONE > linvel > -RemoteControl.DEADZONE:
                     linvel = 0
 
                 if RemoteControl.DEADZONE > angvel > -RemoteControl.DEADZONE:
                     angvel = 0
 
-                self.value.set_value({"linvel": linvel, "angvel": angvel, "duration": 2})
+                self.value.set_value({"linvel": linvel, "angvel": angvel, "duration": 250})
             else:
                 self.value.set_value(RemoteControl.default)
                 self.mode.set_value(True)

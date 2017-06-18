@@ -9,20 +9,20 @@ import math
 
 MILLISECOND = 0.001
 
-DIFFERENTIAL_MODEL_L = 0.7747   # distance between wheels (axle length)
-DIFFERENTIAL_MODEL_R = 0.166    # radius of the wheels
+DIFFERENTIAL_MODEL_L = 0.7747  # distance between wheels (axle length)
+DIFFERENTIAL_MODEL_R = 0.166   # radius of the wheels
 
 RC = False
 AUTONOMOUS = True
-TICKS_PER_REV = 753.2   # encoder ticks for one revolution of wheel
-QPPS = 4000 # max velocity in ticks per second
+TICKS_PER_REV = 894  # encoder ticks for one revolution of wheel 1988
+QPPS = 3700            # max velocity in ticks per second
 
 # PID constants
-P = 10
-I = 0
-D = .1
+P = 20.0
+I = 7.0
+D = 6.5
 
-ACCEL = 2000 # acceleration rate in ticks/sec^2
+ACCEL = 1800  # acceleration rate in ticks/sec^2
 
 
 def current_milli_time():
@@ -34,6 +34,7 @@ class MotorControl(Thread):
     claw = Roboclaw("/dev/roboclaw", 115200)
     claw.Open()
     ADDRESS = 0x80
+    currents = []
 
     def __init__(self, shared):
         Thread.__init__(self)
@@ -77,18 +78,18 @@ class MotorControl(Thread):
     def get_right_speed(lin, ang):
         return ((lin / DIFFERENTIAL_MODEL_R) + DIFFERENTIAL_MODEL_L * ang) / (2 * DIFFERENTIAL_MODEL_R)
 
+    def read_currents(self):
+        MotorControl.currents = MotorControl.claw.ReadCurrents(MotorControl.ADDRESS)
+
     def send_motor_command(self, linear, angular):
         left_vel = int(round(MotorControl.get_left_speed(linear, angular)*TICKS_PER_REV/(2*math.pi)))
         right_vel = int(round(MotorControl.get_right_speed(linear, angular)*TICKS_PER_REV/(2*math.pi)))
         MotorControl.claw.SpeedAccelM1M2(MotorControl.ADDRESS, ACCEL, left_vel, right_vel)
-	sleep(.25)
-	currents = MotorControl.claw.ReadCurrents(MotorControl.ADDRESS)
-	print currents
 
     def run(self):
         self.rc.start()
         self.light.start()
-
+        highcurrent = False
         while self.shared.running.get_value():
 
             command = {}
@@ -110,6 +111,16 @@ class MotorControl(Thread):
             angular = command["angvel"]
 
             # Send command here
+           # self.read_currents()
+
+           # if MotorControl.currents[1] > 21000 and MotorControl.currents[2] > 21000:
+            #    self.send_motor_command(4 * linear, 4 * angular)
+             #   highcurrent = True
+
+           # else:
+            #    self.send_motor_command(linear, angular)
+             #   highcurrent = False
+
             self.send_motor_command(linear, angular)
             starttime = current_milli_time()  # time at start of loop, measure duration of command by comparing
             # current time to this time
@@ -118,7 +129,19 @@ class MotorControl(Thread):
             mode = self.get_mode()
             while self.shared.running.get_value() and not self.shared.new_command.get_value() and mode == self.get_mode():
                 currenttime = current_milli_time()
+ #               self.read_currents()
+  #              print MotorControl.currents
+            #    if MotorControl.currents[1] > 21000 and MotorControl.currents[2] > 21000:
+             #       self.send_motor_command(4*linear, 4*angular)
+              #      highcurrent = True
 
+               # else:
+                #    if highcurrent:
+                 #       self.send_motor_command(linear, angular)
+                  #      highcurrent = False
+		left = MotorControl.claw.ReadISpeedM1(MotorControl.ADDRESS)
+		right = MotorControl.claw.ReadISpeedM2(MotorControl.ADDRESS)
+		
                 # if command has been executed for the duration specified exit and get new command
                 if currenttime - starttime > duration:
                     print "breaking"
